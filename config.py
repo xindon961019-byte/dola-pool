@@ -151,7 +151,9 @@ REFERENCE_FILE_DIR = os.getenv("DOLA_REFERENCE_FILE_DIR", "refs")
 # 任务走到终态时原参考图会被清掉（落盘文件删除 / 临时目录 rmtree），所以要另存一份小图，
 # 否则面板里"参考图"永远是空的。默认只存第一张，避免大规模号池把磁盘吃满。
 THUMB_DIR = os.getenv("DOLA_THUMB_DIR", "thumbs")
-REFERENCE_THUMB_COUNT = int(os.getenv("DOLA_REFERENCE_THUMB_COUNT", "1"))
+# 任务面板保留参考图缩略图；原图仍会在任务结束后清理，避免数据库和磁盘膨胀。
+# 默认保留常见多参考图数量，调用方可用 DOLA_REFERENCE_THUMB_COUNT 覆盖。
+REFERENCE_THUMB_COUNT = int(os.getenv("DOLA_REFERENCE_THUMB_COUNT", "8"))
 REFERENCE_THUMB_MAX_PX = int(os.getenv("DOLA_REFERENCE_THUMB_MAX_PX", "160"))
 REFERENCE_THUMB_QUALITY = int(os.getenv("DOLA_REFERENCE_THUMB_QUALITY", "80"))
 # 单次请求参考图总量上限（落盘后的字节数）

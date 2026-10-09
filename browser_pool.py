@@ -18,8 +18,8 @@ from video_worker_ui import (
     generate_video, resume_video,
 )
 from pure_api_gen import (
-    AbnormalNoAckError, ShortClipError, ensure_web_playable, generate_pure_video,
-    hello_probe, probe_login,
+    AbnormalNoAckError, ContentRejectedError, ShortClipError, ensure_web_playable,
+    generate_pure_video, hello_probe, probe_login,
 )
 import config
 import cred_store
@@ -1542,6 +1542,10 @@ class BrowserPool:
                             print(f"[pool] {account} 派发后无任何回执 → 进【异常】组，换号: {e}", flush=True)
                             self._mark_abnormal(account, str(e))
                             last_err = e
+                        except ContentRejectedError as e:
+                            # 内容/参考素材已被上游明确拒绝，换号重提只会重复同一失败，直接结束任务。
+                            print(f"[pool] {account} 上游拒绝内容或参考素材，结束任务: {e}", flush=True)
+                            raise
                         except AccountLimitedError as e:
                             print(f"[pool] {account} 达到每日上限，立即换号: {e}", flush=True)
                             self._mark_daily_limit(account, str(e))
@@ -1597,24 +1601,15 @@ class BrowserPool:
                         if time.time() < wait_deadline:
                             await asyncio.sleep(WAIT_FREE_ACCOUNT_STEP)
                             continue
-                    # seedance-2.0 要 3 点，只能用满额号：满额暂时用完时排队等，
-                    # 而不是立刻判失败（2.5 会把满额号降到半额，过一会儿才有号空出来）。
-                    if group_wait:
-                        waited = int(config.V20_WAIT_SECONDS // 60)
-                        if (config.V20_WAIT_SECONDS > 0
-                                and not (self.all_accounts_limited
-                                         or self.all_accounts_quota_blocked)):
-                            if group_deadline == 0:
-                                group_deadline = time.time() + config.V20_WAIT_SECONDS
-                                print(f"[pool] {model} 暂无符合额度要求的账号，先排队等待"
-                                     f"（上限 {waited} 分钟）", flush=True)
-                            if time.time() < group_deadline:
-                                await asyncio.sleep(GROUP_WAIT_STEP)
-                                continue
+                    # 目标额度组为空时，不能把任务伪装成可恢复的“排队中”。
+                    # 例如 seedance-2.0 需要满额号，而池中只有半额号；或所有满额号
+                    # 都已被上游限流/冷却。此时任务不会因继续轮询而变得可执行，立即
+                    # 抛出终态错误，让 API 客户端收到 failed，而不是长期看到 queued。
                     # 2.1.0 P3：叠加失败 / 全池重置 概念删除，这里不再有"清标记重跑一轮"。
                     # 有时限且还没到点：这一轮号都试过了，等失败冷却结束后从头再来一轮。
                     # 全池都已达上限/积分不足时没有等待意义，直接走下方的 429 报错。
                     if (deadline is not None and unlimited and time_left() and tried_order
+                            and attempt > 0
                             and not self.all_accounts_limited and not self.all_accounts_quota_blocked):
                         tried.clear()
                         wait_deadline = 0.0

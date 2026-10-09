@@ -1,5 +1,30 @@
 # 部署手册（CentOS 7 / glibc 2.17 / 宝塔面板）
 
+## 2026-10-10 — Ubuntu 蓝队云部署
+
+当前线上实例已部署到 dola.zemra.cn。
+
+Feature summary：部署 dola-pool API、管理面板、Nginx 反代、HTTPS，以及经现有 mihomo VPN 的上游访问。
+
+| 项 | 值 |
+|---|---|
+| 服务器 | 103.47.83.171 |
+| SSH | root@103.47.83.171:28778 |
+| 应用目录 | /opt/dola-pool/current |
+| 发布目录 | /opt/dola-pool/releases/20261010-0120 |
+| 服务 | dola-pool.service（systemd） |
+| 反代 | Nginx → 127.0.0.1:8000 |
+| HTTPS | Let's Encrypt，证书由 certbot 自动续期 |
+| 出口 | 服务器现有 mihomo VPN，代理 172.22.0.1:7890 |
+| 凭据 | 服务器密码和 API Key 均在仓外管理，未写入仓库 |
+
+验证结果：/health 返回 200，HTTP 自动跳转 HTTPS，TLS 证书域名为
+dola.zemra.cn。本次只部署代码和运行环境，没有复制本地账号 Cookie、数据库或视频文件；
+上线后请在管理面板的“账号管理”中导入账号，并先点击“验证”。
+
+回滚：将 /opt/dola-pool/current 指向上一个 /opt/dola-pool/releases/* 目录，
+然后执行 systemctl restart dola-pool，再检查 curl -fsS https://dola.zemra.cn/health。
+
 这是线上实际在用的部署方式，模板都在本目录。老机器（glibc 2.17）
 踩过的坑都写在下面，照着走能一次到位。
 

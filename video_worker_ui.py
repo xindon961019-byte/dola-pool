@@ -30,6 +30,8 @@ import proxy_store
 from browser import cookie_value, launch_account_context
 from dola_client import CREDIT_FAIL_PATTERN, CreditError
 from video_worker import POLL_JS, RiskControlError, _download, extract_unwatermarked_url
+from prompt_policy import build_upstream_prompt
+from pure_api_gen import ContentRejectedError
 
 # Dola 返回的每日上限文案（当前日文 UI 实测：動画生成の 1 日あたりの上限に達しました。）
 DAILY_LIMIT_PATTERN = re.compile(
@@ -63,6 +65,11 @@ HARD_ERROR_TEXT_PATTERNS = [
     ),
 ]
 HARD_ERROR_TEXT_MAX_HITS = 3
+CONTENT_REFUSAL_MARKERS = (
+    "肖像保护", "未认证人脸", "人脸暂不支持", "不支持用", "请更换参考图",
+    "换其它参考图", "换其他参考图", "内容安全", "安全策略", "审核不通过",
+    "版权限制", "涉及版权", "无法为你生成", "不能为你生成",
+)
 # 正常受理文案：出现则说明 Dola 已开始生成，重置终结计数（避免把提问/占位文字误判为失败）
 ACCEPTANCE_TEXT_PATTERN = re.compile(
     r"生成されます|5 分後に完成|ポイントを消費|を生成します|ビデオを生成|動画を生成|生成を開始",
@@ -610,6 +617,13 @@ async def poll_conversation(account: str, page, context, conversation_id: str,
             last_callback = now
         texts = poll.get("texts") or []
         videos = poll.get("videos") or []
+        refusal = next(
+            (str(text).strip() for text in texts
+             if any(marker in str(text) for marker in CONTENT_REFUSAL_MARKERS)),
+            "",
+        )
+        if refusal:
+            raise ContentRejectedError(f"{account} 上游拒绝提示词或参考素材: {refusal[:300]}")
         # ---- 新版 Dola：提交后要求 A/B/C 选择时长，不回复则永远不出片 ----
         if duration and not choice_replied:
             joined = "\n".join(texts)
@@ -819,7 +833,8 @@ async def generate_video(account: str, prompt: str, ratio: str = None,
                 await box.click()
             except Exception:
                 await box.evaluate("(el) => el.focus()")
-            await page.keyboard.type(prompt, delay=100)
+            upstream_prompt = build_upstream_prompt(prompt, duration=duration)
+            await page.keyboard.type(upstream_prompt, delay=100)
             await page.wait_for_timeout(600)
             await page.keyboard.press("Enter")
             print(f"[{account}] UI 已发送: {prompt[:40]}", flush=True)

@@ -19,6 +19,7 @@ from typing import Any, Callable
 
 import config
 from pure_signer import install
+from prompt_policy import build_upstream_prompt
 
 log = logging.getLogger("dola.pure_api")
 
@@ -87,6 +88,10 @@ class _CreditTracker:
 
 class PureApiError(RuntimeError):
     """纯 API 出片失败（含登录态失效/额度/风控等，由调用方决定换号/回退）。"""
+
+
+class ContentRejectedError(PureApiError):
+    """上游明确拒绝提示词或参考素材，不应换号重复提交。"""
 
 
 class PureLoginExpired(PureApiError):
@@ -477,7 +482,7 @@ def _generate_capped_pair(*, dola, session, ctx, headers, account: str, prompt: 
             part_credits = _CreditTracker(credits.on_balance if credits else None)
             submit = dola.submit_chat_completion(
                 session, ctx, headers, images=images or [], audios=[],
-                prompt=f"{prompt}\n\n{hint}",
+                prompt=build_upstream_prompt(f"{prompt}\n\n{hint}", duration=30),
                 duration=30, model=model, ratio=ratio,
                 timeout_sec=180, video_ability=True,
             )
@@ -887,6 +892,7 @@ def generate_pure_video(
             state_file=state_file, region=region, pc_version=pc_version)
     submit_prompt = (dola.enrich_multi_image_prompt(prompt, len(uploaded_images))
                      if uploaded_images else prompt)
+    submit_prompt = build_upstream_prompt(submit_prompt, duration=duration)
     submit = dola.submit_chat_completion(
         session, ctx, headers,
         images=uploaded_images, audios=[], prompt=submit_prompt, duration=duration,
@@ -966,6 +972,8 @@ def generate_pure_video(
         reasons = result.get("failure_reasons") or []
         texts = result.get("texts") or []
         detail = " | ".join(str(x) for x in (reasons + texts))[:300]
+        if getattr(dola, "looks_like_content_refusal", lambda _t: False)(detail):
+            raise ContentRejectedError(f"{account} 上游拒绝提示词或参考素材: {detail}")
         # 派发后一句回执都没有（连额度播报、状态都没有）→ 按拍板判【异常】，提示重试
         if not reasons and not texts:
             raise AbnormalNoAckError(

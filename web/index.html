@@ -111,6 +111,21 @@ input::placeholder,textarea::placeholder{color:#6d7c90}
 select option{background:#111827;color:var(--text)}
 input[type=checkbox]{accent-color:var(--accent);cursor:pointer}
 #accountsTable,#proxiesTable,#tasksTable,#videosTable,#keysTable,#usersTable,#perAccount{overflow-x:auto}
+/* 表格统一采用稳定列宽：内容只占一行，过长显示省略号；完整内容通过 title 悬浮查看。
+   最小宽度配合外层横向滚动，避免窄窗口把中文拆成一列一列的竖排。 */
+#accountsTable table,#proxiesTable table,#tasksTable table,#videosTable table,
+#keysTable table,#usersTable table,#perAccount table{table-layout:fixed;min-width:1180px}
+#accountsTable td,#proxiesTable td,#tasksTable td,#videosTable td,
+#keysTable td,#usersTable td,#perAccount td{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#accountsTable td:nth-child(3){width:150px}
+#accountsTable td:nth-child(4){width:220px}
+#accountsTable td:nth-child(11){width:250px}
+#accountsTable td:last-child{width:360px;overflow:visible}
+#tasksTable td:nth-child(2){width:360px}
+#tasksTable td:nth-child(3){width:150px}
+#tasksTable td:last-child{width:360px}
+#videosTable td:last-child{width:300px;overflow:visible}
+#proxiesTable td:last-child,#keysTable td:last-child,#usersTable td:last-child{width:300px;overflow:visible}
 /* nowrap-fix：窄屏时按钮/标题不折字，工具栏整体换行 */
 .btn,.toolbar h3,.toolbar select{white-space:nowrap}
 .toolbar{flex-wrap:wrap;gap:10px}
@@ -146,13 +161,38 @@ input[type=checkbox]{accent-color:var(--accent);cursor:pointer}
 .empty{padding:34px;text-align:center;color:var(--sub)}
 .video-wrap{display:flex;gap:8px;align-items:center}
 .tiny{font-size:12px;color:var(--sub)}
+.docs-layout{display:grid;grid-template-columns:210px minmax(0,1fr);gap:16px;align-items:start}
+.docs-toc{position:sticky;top:20px;padding:12px;background:rgba(255,255,255,.045);border:1px solid var(--line);border-radius:14px}
+.docs-toc a{display:block;padding:8px 10px;border-radius:8px;color:var(--sub);font-size:13px}
+.docs-toc a:hover{background:rgba(46,230,168,.12);color:var(--text)}
+.docs-content{min-width:0}
+.docs-content h1{font-size:22px;margin-bottom:8px}
+.docs-content h2{font-size:18px;margin:26px 0 12px;padding-top:8px;border-top:1px solid var(--line)}
+.docs-content h3{font-size:15px;margin:18px 0 8px;color:#eaf0f7}
+.docs-content p,.docs-content li{color:var(--sub);line-height:1.7}
+.docs-content ul,.docs-content ol{padding-left:22px;margin:8px 0 14px}
+.docs-content .endpoint{display:flex;align-items:center;gap:10px;margin:18px 0 8px}
+.method{font:700 11px ui-monospace,monospace;padding:4px 8px;border-radius:6px;background:rgba(46,230,168,.16);color:#5cf0bb;border:1px solid rgba(46,230,168,.3)}
+.method.get{background:rgba(107,168,255,.16);color:#a3c9ff;border-color:rgba(107,168,255,.3)}
+.docs-content .path{font:600 14px ui-monospace,SFMono-Regular,Consolas,monospace;color:var(--text);word-break:break-all}
+.docs-content pre{margin:8px 0 14px;padding:14px;overflow:auto;background:rgba(0,0,0,.32);border:1px solid var(--line);border-radius:10px;color:#d8e6f5;font:12px/1.65 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre}
+.docs-content table{margin:8px 0 16px}
+.docs-content th,.docs-content td{font-size:12px;padding:8px}
+.docs-content .callout{padding:12px 14px;border-left:3px solid var(--accent);background:rgba(46,230,168,.07);border-radius:8px;margin:10px 0 16px;color:var(--sub);line-height:1.7}
+.docs-content .warn{border-left-color:var(--orange);background:rgba(255,180,84,.08)}
+@media (max-width:920px){.docs-layout{grid-template-columns:1fr}.docs-toc{position:static;display:flex;gap:4px;overflow:auto}.docs-toc a{white-space:nowrap}}
 /* 报错/备注：上游拒稿原文（审核不合规、肖像保护、侵权…）字数多且可能带换行，
    这里完整展开显示，不再为了一行放下而截断成 30 字。 */
-.err{display:inline-block;max-width:420px;white-space:pre-wrap;word-break:break-word;
+.err{display:block;max-width:420px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
   font-size:12px;line-height:1.55;color:#ff9a9a}
-.note{display:inline-block;max-width:300px;white-space:pre-wrap;word-break:break-word;
+.note{display:block;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
   font-size:12px;line-height:1.55;color:var(--sub);cursor:pointer}
 .note:hover{color:#a9d8c6}
+.group-reason{display:block;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  color:var(--sub);font-size:12px;line-height:1.45}
+#accountsTable td:nth-child(11){max-width:300px}
+#accountsTable td:last-child{min-width:330px;white-space:nowrap}
+#perAccount td:last-child{max-width:300px}
 .log-pane{max-height:260px;overflow:auto;background:rgba(0,0,0,.3);border:1px solid var(--line);border-radius:10px;
   padding:10px;white-space:pre-wrap;font-family:ui-monospace,Consolas,monospace}
 .account-id{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;color:#a9d8c6;font-weight:600}
@@ -197,6 +237,7 @@ input[type=checkbox]{accent-color:var(--accent);cursor:pointer}
     <button class="nav-item" data-tab="tasks" onclick="switchTab('tasks')"><svg viewBox="0 0 24 24"><path d="M9.5 6h10.5M9.5 12h10.5M9.5 18h10.5"/><circle cx="4.8" cy="6" r="1.4"/><circle cx="4.8" cy="12" r="1.4"/><circle cx="4.8" cy="18" r="1.4"/></svg><span>任务列表</span></button>
     <button class="nav-item" data-tab="videos" onclick="switchTab('videos')"><svg viewBox="0 0 24 24"><rect x="2.8" y="5" width="18.4" height="14" rx="2.6"/><path d="M10.2 9.3l5.2 2.7-5.2 2.7z" fill="currentColor" stroke="none"/></svg><span>视频管理</span></button>
     <button class="nav-item" data-tab="keys" onclick="switchTab('keys')"><svg viewBox="0 0 24 24"><circle cx="8" cy="14.4" r="4.3"/><path d="M11.2 11.2l8-8M17 5.4l2.4 2.4M14.4 8l2.4 2.4"/></svg><span>API 密钥</span></button>
+    <button class="nav-item" data-tab="docs" onclick="switchTab('docs')"><svg viewBox="0 0 24 24"><path d="M5 3.8h10l4 4v12.4H5z"/><path d="M15 3.8v4h4M8 12h8M8 16h8"/></svg><span>接口文档</span></button>
     <button class="nav-item" data-tab="users" onclick="switchTab('users')"><svg viewBox="0 0 24 24"><circle cx="9.4" cy="8" r="3.4"/><path d="M2.9 20c0-3.4 2.9-5.6 6.5-5.6s6.5 2.2 6.5 5.6"/><path d="M17.2 5.3a3.4 3.4 0 010 6.5M18.6 20c0-2.4-.8-4.2-2.2-5.2"/></svg><span>用户管理</span></button>
   </nav>
 
@@ -290,6 +331,157 @@ input[type=checkbox]{accent-color:var(--accent);cursor:pointer}
     </div>
   </section>
 
+  <section id="tab-docs" style="display:none">
+    <div class="docs-layout">
+      <nav class="docs-toc">
+        <a href="#docs-start">快速开始</a><a href="#docs-auth">鉴权</a><a href="#docs-create">提交任务</a>
+        <a href="#docs-query">查询状态</a><a href="#docs-content">下载视频</a><a href="#docs-ark">Ark 兼容</a><a href="#docs-models">模型</a>
+        <a href="#docs-health">健康检查</a><a href="#docs-errors">错误排查</a>
+      </nav>
+      <article class="card docs-content">
+        <h1 id="docs-start">dola-pool API 文档</h1>
+        <p>当前服务的标准 HTTP API 说明，包含鉴权、参数、响应、轮询和下载流程，可直接用于客户端或无限画布接入。</p>
+        <div class="callout"><b>服务地址：</b><code id="docsBaseUrl"></code><br>生产环境请将示例中的 <code>BASE_URL</code> 替换为服务域名或内网地址。</div>
+
+        <h2 id="docs-auth">鉴权与通用约定</h2>
+        <ul><li>客户接口使用 <code>Authorization: Bearer &lt;API_KEY&gt;</code>。</li>
+        <li>API Key 在“API 密钥”菜单创建，完整密钥只在创建成功时显示一次。</li>
+        <li>JSON 请求设置 <code>Content-Type: application/json</code>；参考图也支持 multipart/form-data。</li>
+        <li>任务是异步的：提交返回 <code>queued</code>，随后轮询直到 <code>completed</code> 或 <code>failed</code>。</li>
+        <li>支持时长由服务配置和 API Key 权限共同决定，实际档位以密钥页面为准。</li></ul>
+
+        <h2 id="docs-create">提交视频任务</h2>
+        <div class="endpoint"><span class="method">POST</span><span class="path">/v1/videos</span><span class="badge b-blue">202 Accepted</span></div>
+        <p>创建异步视频任务。<code>/v1/videos/generations</code> 是相同逻辑的 OpenAI 风格兼容入口。</p>
+        <h3>请求头</h3><pre>Authorization: Bearer sk-your-api-key
+Content-Type: application/json</pre>
+        <h3>JSON 参数</h3>
+        <table><thead><tr><th>字段</th><th>类型</th><th>必填</th><th>说明</th></tr></thead><tbody>
+          <tr><td><code>model</code></td><td>string</td><td>否</td><td>默认 seedance-2.0；可用模型见 /v1/models。</td></tr>
+          <tr><td><code>prompt</code></td><td>string</td><td>是</td><td>视频提示词，不能为空。</td></tr>
+          <tr><td><code>duration</code></td><td>integer</td><td>否</td><td>秒数；也接受 seconds、duration_seconds。</td></tr>
+          <tr><td><code>ratio</code></td><td>string</td><td>否</td><td>画幅，例如 16:9、9:16、1:1。</td></tr>
+          <tr><td><code>size</code></td><td>string</td><td>否</td><td>兼容画布的尺寸字段，优先用于推导画幅。</td></tr>
+          <tr><td><code>reference_images</code></td><td>string[]</td><td>否</td><td>参考图 URL 数组；也支持 image_url、image 等兼容字段。</td></tr>
+        </tbody></table>
+        <h3>curl 示例</h3><pre>curl -X POST "$BASE_URL/v1/videos" \
+  -H "Authorization: Bearer $API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "seedance-2.0",
+    "prompt": "汉服美女在赛博朋克街道跑酷，镜头稳定，霓虹灯反射",
+    "duration": 5,
+    "ratio": "16:9"
+  }'</pre>
+        <h3>成功响应（202）</h3><pre>{
+  "id": "video_7f12bb3c835c4a84adb743226dc71f1e",
+  "status": "queued",
+  "model": "seedance-2.0",
+  "prompt": "汉服美女在赛博朋克街道跑酷，镜头稳定，霓虹灯反射",
+  "video_url": null,
+  "error": null,
+  "progress": {"state": "queued", "position": 1, "message": "排队中，预计不到 1 分钟"}
+}</pre>
+
+        <h2 id="docs-query">查询任务状态</h2>
+        <div class="endpoint"><span class="method get">GET</span><span class="path">/v1/videos/{task_id}</span><span class="badge b-blue">200 OK</span></div>
+        <p>使用提交接口返回的 <code>id</code> 查询进度。建议每 3～10 秒请求一次，不要高频轮询。</p>
+        <pre>curl "$BASE_URL/v1/videos/$TASK_ID" \
+  -H "Authorization: Bearer $API_KEY"</pre>
+        <table><thead><tr><th>status</th><th>含义</th><th>客户端动作</th></tr></thead><tbody>
+          <tr><td><code>queued</code></td><td>等待账号或并发槽位</td><td>继续轮询</td></tr>
+          <tr><td><code>processing</code></td><td>上游正在生成</td><td>继续轮询</td></tr>
+          <tr><td><code>completed</code></td><td>已完成，返回 video_url</td><td>播放或下载</td></tr>
+          <tr><td><code>failed</code></td><td>生成失败</td><td>读取 error 并处理</td></tr>
+        </tbody></table>
+        <h3>完成响应</h3><pre>{
+  "id": "video_7f12bb3c835c4a84adb743226dc71f1e",
+  "status": "completed",
+  "video_url": "http://127.0.0.1:8002/videos/acc1_xxx.mp4",
+  "error": null,
+  "progress": {"state": "done", "message": "已完成"}
+}</pre>
+        <h3>JavaScript 轮询示例</h3><pre>async function waitForVideo(taskId, apiKey) {
+  while (true) {
+    const response = await fetch(BASE_URL + "/v1/videos/" + taskId, {
+      headers: { Authorization: "Bearer " + apiKey }
+    });
+    const task = await response.json();
+    if (task.status === "completed") return task.video_url;
+    if (task.status === "failed") throw new Error(task.error || "生成失败");
+    await new Promise(resolve =&gt; setTimeout(resolve, 5000));
+  }
+}</pre>
+
+        <h2 id="docs-content">下载视频文件</h2>
+        <div class="endpoint"><span class="method get">GET</span><span class="path">/v1/videos/{task_id}/content</span><span class="badge b-blue">200 OK</span></div>
+        <p>任务完成后返回视频二进制内容，适合不想处理 <code>video_url</code> 的客户端。未完成时返回 <code>409 video not ready</code>。</p>
+        <pre>curl -L "$BASE_URL/v1/videos/$TASK_ID/content" \
+  -H "Authorization: Bearer $API_KEY" \
+  -o output.mp4</pre>
+        <div class="callout warn">也可以直接对完成响应中的 <code>video_url</code> 发 GET。浏览器播放本机视频时，必须能访问同一台机器的地址和端口。</div>
+
+        <h2 id="docs-ark">火山 Ark / 画布任务兼容接口</h2>
+        <p>以下四个前缀注册的是同一套逻辑，画布或 Ark 客户端任选一个即可。鉴权方式仍为 Bearer API Key。</p>
+        <pre>POST /v1/video/contents/generations/tasks
+POST /api/v3/contents/generations/tasks
+POST /v1/contents/generations/tasks
+POST /seedance/v3/contents/generations/tasks</pre>
+        <h3>创建任务</h3>
+        <pre>curl -X POST "$BASE_URL/api/v3/contents/generations/tasks" \
+  -H "Authorization: Bearer $API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "seedance-2.5",
+    "content": [
+      {"type": "text", "text": "一只柴犬在雪地里奔跑"},
+      {"type": "image_url", "image_url": {"url": "https://example.com/dog.jpg"}}
+    ],
+    "duration": 10,
+    "ratio": "16:9"
+  }'</pre>
+        <p>请求成功返回 <code>{"id":"video_xxx","status":"queued"}</code>。图片可选；<code>content</code> 中必须至少有一个 <code>type=text</code>。</p>
+        <h3>查询任务</h3>
+        <pre>GET /api/v3/contents/generations/tasks/{task_id}</pre>
+        <pre>{
+  "id": "video_xxx",
+  "model": "seedance-2.5",
+  "status": "succeeded",
+  "created_at": 1789804800,
+  "updated_at": 1789804923,
+  "content": {"video_url": "https://your-domain/videos/video_xxx.mp4"}
+}</pre>
+        <p>Ark 状态映射为：<code>queued → queued</code>、<code>processing → running</code>、<code>completed → succeeded</code>、<code>failed → failed</code>。</p>
+
+        <h2 id="docs-models">模型列表</h2>
+        <div class="endpoint"><span class="method get">GET</span><span class="path">/v1/models</span><span class="badge b-blue">200 OK</span></div>
+        <p>返回当前支持的模型，通常不要求 API Key。</p>
+        <pre>curl "$BASE_URL/v1/models"
+
+{"object":"list","data":[
+  {"id":"seedance-2.0","object":"model","owned_by":"dola-pool","created":0},
+  {"id":"seedance-2.5","object":"model","owned_by":"dola-pool","created":0}
+]}</pre>
+
+        <h2 id="docs-health">健康检查</h2>
+        <div class="endpoint"><span class="method get">GET</span><span class="path">/health</span><span class="badge b-blue">200 OK</span></div>
+        <p>用于容器、反向代理或监控检查服务是否在线，并返回账号池、队列和存储概况。</p>
+        <pre>curl "$BASE_URL/health"</pre>
+
+        <h2 id="docs-errors">错误码与排查</h2>
+        <table><thead><tr><th>HTTP</th><th>常见原因</th><th>处理建议</th></tr></thead><tbody>
+          <tr><td>401</td><td>缺少或错误的 API Key</td><td>检查 Authorization 和密钥启用状态。</td></tr>
+          <tr><td>404</td><td>任务不存在或不属于当前 Key</td><td>确认 task_id 未截断，并使用提交任务的同一个 Key。</td></tr>
+          <tr><td>409</td><td>视频尚未完成</td><td>继续轮询，直到 completed。</td></tr>
+          <tr><td>422</td><td>参数、模型、时长或画幅不合法</td><td>按 detail 提示修改请求。</td></tr>
+          <tr><td>429</td><td>Key 配额、并发或账号额度不足</td><td>等待额度恢复，或检查账号池。</td></tr>
+          <tr><td>503</td><td>没有可调度账号</td><td>在账号管理添加并验证账号，打开调度。</td></tr>
+        </tbody></table>
+        <div class="callout">标准流程：<b>POST /v1/videos → GET /v1/videos/{id} 轮询 → GET /v1/videos/{id}/content 下载</b>。不要在 POST 返回后立即请求 content。</div>
+      </article>
+    </div>
+  </section>
+
   <section id="tab-users" style="display:none">
     <div class="card">
       <div class="toolbar">
@@ -366,7 +558,7 @@ function logout(){adminKey='';localStorage.removeItem(LS_KEY);showLogin();}
 function switchTab(t){
   curTab=t;
   document.querySelectorAll('.side-nav .nav-item').forEach(b=>b.classList.toggle('on',b.dataset.tab===t));
-  ['dash','accounts','proxies','tasks','videos','keys','users'].forEach(x=>{q('#tab-'+x).style.display=x===t?'block':'none';});
+  ['dash','accounts','proxies','tasks','videos','keys','docs','users'].forEach(x=>{q('#tab-'+x).style.display=x===t?'block':'none';});
   refresh();
 }
 
@@ -380,6 +572,7 @@ async function refresh(){
     else if(curTab==='tasks')await loadTasks();
     else if(curTab==='videos')await loadVideos();
     else if(curTab==='keys')await loadKeys();
+    else if(curTab==='docs'){const el=q('#docsBaseUrl');if(el)el.textContent=location.origin;}
     else if(curTab==='users')await loadUsers();
   }catch(e){if(e.message!=='unauthorized'){/* 静默 */}}
 }
@@ -457,7 +650,7 @@ function groupBadge(a){
   const g=a.group||'';
   if(!g)return '<span class="tiny">—</span>';
   return '<span class="badge '+(GROUP_STYLE[g]||'b-gray')+'" title="'+esc(a.group_reason||g)+'">'+esc(g)+'</span>'
-    +(a.group_reason?'<div class="tiny">'+esc(a.group_reason)+'</div>':'');
+    +(a.group_reason?'<span class="group-reason" title="'+esc(a.group_reason)+'">'+esc(a.group_reason)+'</span>':'');
 }
 function renderGroupBar(d,container,jump){
   const g=d.groups||{};
@@ -561,7 +754,7 @@ function noteCell(x){
   const note=x.note||'';
   const open=`onclick="editNote('${x.name}')"`;
   if(!note)return `<span class="tiny" style="cursor:pointer" title="点击可填写备注" ${open}>—</span>`;
-  return `<span class="note" title="点击编辑备注" ${open}>${esc(note)}</span>`;
+  return `<span class="note" title="${esc(note)}" ${open}>${esc(note)}</span>`;
 }
 async function editNote(name){
   const cur=(allAccounts.find(a=>a.name===name)||{}).note||'';
@@ -1195,6 +1388,9 @@ function renderAddAccountForm(){
       <label>账号名</label><input id="f_name" value="${def}">
       <label>Cookie JSON</label>
       <textarea id="f_cookies" rows="13" style="width:100%;padding:8px 12px;border:1px solid var(--line);border-radius:8px;font-size:12px;font-family:ui-monospace,Consolas,monospace;margin-top:4px" placeholder='{"format":"...","cookies":[{"name":"sessionid",...}]}'></textarea>
+      <div style="display:flex;justify-content:flex-end;margin-top:8px">
+        <button class="btn" type="button" onclick="convertCookieJson()">转换为标准 JSON</button>
+      </div>
       <div class="hint" style="margin-top:6px">粘贴 Cookie-Editor / EditThisCookie 等扩展导出的完整 JSON。</div>
       <label style="margin-top:10px;display:flex;align-items:flex-start;gap:6px;color:var(--sub)">
         <input type="checkbox" id="f_skip" style="margin-top:2px;width:auto">
@@ -1223,6 +1419,52 @@ async function submitAddCookie(){
   try{JSON.parse(body.cookies);}catch(e){return alert('Cookie JSON 解析失败：'+e.message);}
   try{await api('/api/admin/accounts',{method:'POST',body});}catch(e){return alert(e.message);}
   hide('dlg');refresh();
+}
+
+function normalizeCookieItems(items){
+  if(!Array.isArray(items))throw new Error('未找到 cookies 数组');
+  const out=[];
+  for(const item of items){
+    if(!item || typeof item!=='object')continue;
+    const name=String(item.name??'').trim();
+    if(!name)continue;
+    out.push({name,value:String(item.value??''),domain:String(item.domain||'.dola.com'),path:String(item.path||'/')});
+  }
+  if(!out.length)throw new Error('cookies 数组为空或缺少 name 字段');
+  return out;
+}
+
+function parseCookieHeaderText(text){
+  const raw=String(text||'').trim().replace(/^Cookie:\s*/i,'');
+  const out=[];
+  for(const part of raw.split(';')){
+    const i=part.indexOf('=');
+    if(i<=0)continue;
+    const name=part.slice(0,i).trim();
+    const value=part.slice(i+1).trim();
+    if(name)out.push({name,value,domain:'.dola.com',path:'/'});
+  }
+  if(!out.length)throw new Error('没有解析到 name=value Cookie');
+  return out;
+}
+
+function convertCookieJson(){
+  const el=q('#f_cookies');const text=el.value.trim();
+  if(!text)return alert('请先粘贴 Cookie JSON 或 Cookie 头文本');
+  try{
+    let items;
+    try{
+      const parsed=JSON.parse(text);
+      if(Array.isArray(parsed))items=parsed;
+      else if(parsed&&Array.isArray(parsed.cookies))items=parsed.cookies;
+      else if(parsed&&typeof parsed==='object')items=Object.entries(parsed).map(([name,value])=>({name,value}));
+      else throw new Error('JSON 顶层必须是对象或数组');
+    }catch(jsonErr){
+      items=parseCookieHeaderText(text);
+    }
+    el.value=JSON.stringify({cookies:normalizeCookieItems(items)},null,2);
+    alert('已转换为标准 Cookie JSON');
+  }catch(e){alert('转换失败：'+(e.message||e));}
 }
 
 /* ---- 代理管理 ---- */
@@ -1595,9 +1837,10 @@ function refThumbs(t){
 function refCell(t){
   const list=refThumbs(t);
   if(!list.length)return '<span class="tiny">无</span>';
-  const url='/thumbs/'+encodeURIComponent(list[0]);
-  return '<img class="thumb" src="'+url+'" title="点击放大" onclick="showThumb(\''+esc(url)+'\')">'
-    +(list.length>1?'<span class="tiny">+'+(list.length-1)+'</span>':'');
+  return list.map((name,index)=>{
+    const url='/thumbs/'+encodeURIComponent(name);
+    return '<img class="thumb" src="'+url+'" title="参考图 '+(index+1)+'，点击放大" onclick="showThumb(\''+esc(url)+'\')">';
+  }).join('');
 }
 function showThumb(url){q('#thumbImg').src=url;show('thumbModal');}
 

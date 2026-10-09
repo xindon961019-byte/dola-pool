@@ -48,6 +48,7 @@ from browser_pool import (
     GROUP_RISK,
     AllAccountsLimitedError,
     AllAccountsQuotaBlockedError,
+    AllAccountsGroupEmptyError,
     BrowserPool,
 )
 from media import (
@@ -670,7 +671,8 @@ async def _run_task(task_id, model, prompt, ratio, duration, reference_images, c
                      finished_at=time.time(), **meta)
         # 出片目录超限就从旧到新删，避免磁盘被撑满（同样是同步目录遍历）
         await asyncio.to_thread(_prune_downloads)
-    except (AllAccountsLimitedError, AllAccountsQuotaBlockedError) as e:
+    except (AllAccountsLimitedError, AllAccountsQuotaBlockedError,
+            AllAccountsGroupEmptyError) as e:
         store.update(task_id, status="failed", error=failure_text.summarize(str(e)),
                      failure_code="429", finished_at=time.time())
     except asyncio.CancelledError:
